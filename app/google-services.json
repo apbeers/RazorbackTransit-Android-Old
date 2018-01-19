@@ -1,0 +1,71 @@
+{
+  "project_info": {
+    "project_number": "558056407860",
+    "firebase_url": "https://razorback-transi-1506458108408.firebaseio.com",
+    "project_id": "razorback-transi-1506458108408",
+    "storage_bucket": "razorback-transi-1506458108408.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:558056407860:android:8fc9e9a4d8efe101",
+        "android_client_info": {
+          "package_name": "razorbacktransit.arcu.razorbacktransit"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "558056407860-nf60p97vfn7ur16e8buele22mt35jkd8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "razorbacktransit.arcu.razorbacktransit",
+            "certificate_hash": "90b6ab913da1176c74163ab156ebf52890eb0e78"
+          }
+        },
+        {
+          "client_id": "558056407860-kjkp24n10gn952lja86bqu9b1p3umm6s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "razorbacktransit.arcu.razorbacktransit",
+            "certificate_hash": "8e7f35f1908736be61aecc6e082671983552d832"
+          }
+        },
+        {
+          "client_id": "558056407860-5qkq6rfoappnh7k3h2t0n1hiq396tn8p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2UpLk93n4l_AEul8Sy9iZ5FwyY1yV-HI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "558056407860-5qkq6rfoappnh7k3h2t0n1hiq396tn8p.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "558056407860-uv29fpmegrmnai3dk0f2tsc1r14ic4tk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "arcu.razorbacktransit",
+                "app_store_id": "1286547241"
+              }
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
