@@ -25,7 +25,7 @@ Feel free to reach out to me  at [apbeers@gmail.com](mailto:apbeers@gmail.com) a
 
 ## Releases
 
-I'll do a release whenever a new feature or noticable performance improvement is finished. We will test the app using Apple's TestFlight app for a few days to make sure it behaves correctly (I can add your friends to the beta as well, since the more testers the better). People rely on it every day it's up to us not to cause an outage.
+I'll do a release whenever a new feature or noticable performance improvement is finished. We will test the app using the Beta  functionality of Google play console for a few days to make sure it behaves correctly (I can add your friends to the beta as well, since the more testers the better). People rely on it every day it's up to us not to cause an outage.
 
 Download for Android here:
 https://play.google.com/store/apps/details?id=razorbacktransit.arcu.razorbacktransit
@@ -36,3 +36,5 @@ https://play.google.com/store/apps/details?id=razorbacktransit.arcu.razorbacktra
 git clone https://github.com/apbeers/RazorbackTransit-Android.git
 cd RazorbackTransit-Android
 ```
+
+You will also need to get your own google maps API key to for it work (they're free)
