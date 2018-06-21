@@ -17,9 +17,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             //signingConfig signingConfigs.config
             minifyEnabled true
+            shrinkResources true
         }
         debug {
-            //signingConfig signingConfigs.config
+           // signingConfig signingConfigs.config
         }
     }
 }
