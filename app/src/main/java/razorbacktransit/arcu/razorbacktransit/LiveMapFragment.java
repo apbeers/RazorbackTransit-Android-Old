@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -23,6 +24,7 @@ import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -165,7 +167,7 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback, Goo
         this.googleMap = googleMap;
 
         this.googleMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(36.09, -94.1785)));
-        this.googleMap.moveCamera(CameraUpdateFactory.zoomTo(12.6f));
+        this.googleMap.moveCamera(CameraUpdateFactory.zoomTo(12.0f));
         this.googleMap.setMinZoomPreference(10);
         this.googleMap.setOnMarkerClickListener(this);
         UiSettings uiSettings = this.googleMap.getUiSettings();
@@ -379,6 +381,15 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback, Goo
                                         e.printStackTrace();
                                     }
 
+                                    LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+                                    for (Marker marker : stopMarkerHashMap.keySet().toArray(new Marker[]{})) {
+                                        builder.include(marker.getPosition());
+                                    }
+                                    LatLngBounds bounds = builder.build();
+                                    int padding = busImageHeight; // offset from edges of the map in pixels
+                                    CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+                                    googleMap.animateCamera(cu);
                                 }
                             }
 
