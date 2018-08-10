@@ -34,10 +34,6 @@ public class MainActivity extends AppCompatActivity
     private FirebaseAnalytics mFirebaseAnalytics;
     private final FragmentManager fragmentManager = getSupportFragmentManager();
 
-
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -123,7 +119,10 @@ public class MainActivity extends AppCompatActivity
             }
 
             fragmentTransaction.commit();
-            getSupportActionBar().setTitle(R.string.live_map_nav_bar_header);
+
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle(R.string.live_map_nav_bar_header);
+            }
 
         } else if (id == R.id.nav_schedules) {
 
@@ -148,7 +147,10 @@ public class MainActivity extends AppCompatActivity
             }
 
             fragmentTransaction.commit();
-            getSupportActionBar().setTitle(R.string.schedules_nav_bar_header);
+
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle(R.string.schedules_nav_bar_header);
+            }
 
         } else if (id == R.id.nav_routes) {
 
@@ -174,7 +176,10 @@ public class MainActivity extends AppCompatActivity
             }
 
             fragmentTransaction.commit();
-            getSupportActionBar().setTitle(R.string.routes_nav_bar_header);
+
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle(R.string.routes_nav_bar_header);
+            }
 
         } else if (id == R.id.nav_parking) {
 
@@ -202,7 +207,10 @@ public class MainActivity extends AppCompatActivity
             }
 
             fragmentTransaction.commit();
-            getSupportActionBar().setTitle(R.string.parking_map_nav_bar_header);
+
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle(R.string.parking_map_nav_bar_header);
+            }
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

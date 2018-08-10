@@ -78,7 +78,12 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback, Goo
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+        try {
+            sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+
         editor = sharedPreferences.edit();
 
         final int widthPixels = getActivity().getResources().getDisplayMetrics().widthPixels;
@@ -381,6 +386,8 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback, Goo
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
                 }
             }
         });
@@ -534,6 +541,8 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback, Goo
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
                 }
             }
         });
@@ -608,6 +617,8 @@ public class LiveMapFragment extends Fragment implements OnMapReadyCallback, Goo
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
                 }
             }
         });
