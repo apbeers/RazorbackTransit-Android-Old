@@ -12,6 +12,9 @@ import com.github.barteksc.pdfviewer.PDFView;
 
 import java.io.InputStream;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 
 /**
@@ -24,9 +27,9 @@ import java.io.InputStream;
  */
 public class ParkingMapFragment extends Fragment {
 
-    private PDFView pdfView;
+    @BindView(R.id.pdfView) PDFView pdfView;
+    private Unbinder unbinder;
     private Boolean loaded;
-
     private OnFragmentInteractionListener mListener;
 
     public ParkingMapFragment() {
@@ -53,8 +56,7 @@ public class ParkingMapFragment extends Fragment {
         // Inflate the layout for this fragment
 
         View view = inflater.inflate(R.layout.fragment_parking_map, container, false);
-
-        pdfView = (PDFView)view.findViewById(R.id.pdfView);
+        unbinder = ButterKnife.bind(this, view);
 
         InputStream inputStream = getResources().openRawResource(
                 getResources().getIdentifier("parkmap",
@@ -95,6 +97,12 @@ public class ParkingMapFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
     }
 
     /**

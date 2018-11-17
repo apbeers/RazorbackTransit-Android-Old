@@ -12,6 +12,9 @@ import com.github.barteksc.pdfviewer.PDFView;
 
 import java.io.InputStream;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -27,7 +30,7 @@ public class ViewRouteFragment extends Fragment {
     private static final String ARG_PARAM1 = "filepath";
 
     private String mParam1;
-    private PDFView pdfView;
+    @BindView(R.id.pdfView) PDFView pdfView;
 
     private OnFragmentInteractionListener mListener;
 
@@ -56,7 +59,7 @@ public class ViewRouteFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_view_route, container, false);
-        pdfView = (PDFView)view.findViewById(R.id.pdfView);
+        ButterKnife.bind(this, view);
 
         InputStream inputStream = getResources().openRawResource(
                 getResources().getIdentifier(mParam1,
