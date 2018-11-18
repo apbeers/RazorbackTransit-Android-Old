@@ -14,7 +14,7 @@ public class PDFFactory {
     private PDF PURPLE44 = new PDF("Purple 44", "purple_44_schedule");
     private PDF RED26 = new PDF("Red 26", "red_26_schedule");
     private PDF REMOTEEXPRESS = new PDF("Remote Express 48", "remoteexpress_48_schedule");
-    private PDF ROUTE13 = new PDF("Route 13", "route_13_schedule");
+    private PDF ROUTE13 = new PDF("BusRoute 13", "route_13_schedule");
     private PDF TAN35 = new PDF("Tan 35", "tan_35_schedule");
     private PDF YELLOW12 = new PDF("Yellow 12", "yellow_12_schedule");
     private PDF GRAY21 = new PDF("Gray 21", "gray_21_schedule");
@@ -34,7 +34,7 @@ public class PDFFactory {
     private PDF PURPLE44_ROUTE = new PDF("Purple 44", "purple_44_route");
     private PDF RED26_ROUTE = new PDF("Red 26", "red_26_route");
     private PDF REMOTEEXPRESS_ROUTE = new PDF("Remote Express 48", "remoteexpress_48_route");
-    private PDF ROUTE13_ROUTE = new PDF("Route 13", "route_13_route");
+    private PDF ROUTE13_ROUTE = new PDF("BusRoute 13", "route_13_route");
     private PDF TAN35_ROUTE = new PDF("Tan 35", "tan_35_route");
     private PDF YELLOW12_ROUTE = new PDF("Yellow 12", "yellow_12_route");
     private PDF GRAY21_ROUTE = new PDF("Gray 21", "gray_21_route");
