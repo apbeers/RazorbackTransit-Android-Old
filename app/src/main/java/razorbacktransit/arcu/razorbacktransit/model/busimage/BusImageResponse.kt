@@ -1,5 +1,6 @@
 package razorbacktransit.arcu.razorbacktransit.model.busimage
 
-import android.graphics.Bitmap
+class BusImageResponse(val image: String)
+{
 
-class BusImage(val image: Bitmap)
+}

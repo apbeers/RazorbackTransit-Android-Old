@@ -2,12 +2,8 @@ package razorbacktransit.arcu.razorbacktransit
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
-import android.util.Base64
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,15 +13,21 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.*
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.PolylineOptions
+import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.schedulers.Schedulers
 import razorbacktransit.arcu.razorbacktransit.model.bus.Bus
 import razorbacktransit.arcu.razorbacktransit.model.route.Route
 import razorbacktransit.arcu.razorbacktransit.network.TransitStream
 import razorbacktransit.arcu.razorbacktransit.utils.clearMarkers
-import java.util.*
+import java.util.concurrent.TimeUnit
+
 
 class LiveMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener
 {
@@ -34,15 +36,13 @@ class LiveMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickL
     private var sharedPreferences: SharedPreferences? = null
     private var editor: SharedPreferences.Editor? = null
 
-    private val stopMarkerHashMap = HashMap<Marker, String>()
     private val markers = arrayListOf<Marker>()
-    private val routeIds = arrayListOf<String>()
 
     private var stopImageWidth: Int = 0
     private var stopImageHeight: Int = 0
-    private var busImageWidth: Int = 0
-    private var busImageHeight: Int = 0
     private val disposables = CompositeDisposable()
+
+    private val updateBusesNotification = Flowable.interval(5, TimeUnit.SECONDS, Schedulers.io()).startWith(0).publish().refCount()
 
 
     override fun onCreate(savedInstanceState: Bundle?)
@@ -57,18 +57,18 @@ class LiveMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickL
         stopImageWidth = (widthPixels * 0.02638888889).toInt()
         stopImageHeight = (widthPixels * 0.02638888889).toInt()
 
-        busImageWidth = (widthPixels * 0.05833333333).toInt()
-        busImageHeight = (widthPixels.toDouble() * 0.05833333333 * 1.6153846154).toInt()
 
-        // Update the UI for the routes
         disposables += TransitStream.routes
-                .map { it.filter { it.name == "green" } }
+                .flatMapIterable { it }
                 .observeOn( AndroidSchedulers.mainThread() )
                 .subscribe( this::updateRoutes )
 
-        // Update the UI for the buses
-        disposables += TransitStream.buses
-                .map { buses -> buses.filter { bus -> routeIds.contains( bus.id ) } }
+        disposables += updateBusesNotification
+                .flatMap { TransitStream.getBusses( context!! ) }
+                .observeOn( AndroidSchedulers.mainThread() )
+                .doOnNext { markers.clearMarkers() }
+                .observeOn( Schedulers.computation() )
+                .flatMapIterable { it }
                 .observeOn( AndroidSchedulers.mainThread() )
                 .subscribe( this::updateBusses )
     }
@@ -87,8 +87,9 @@ class LiveMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickL
     {
         super.onResume()
 
-        if( this::googleMap.isInitialized )
+        if (this::googleMap.isInitialized)
         {
+            markers.clearMarkers()
             googleMap.clear()
         }
     }
@@ -99,7 +100,7 @@ class LiveMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickL
         editor!!.apply()
     }
 
-    override fun onAttach( context: Context? )
+    override fun onAttach(context: Context?)
     {
         super.onAttach(context)
         if (context is OnFragmentInteractionListener)
@@ -119,11 +120,11 @@ class LiveMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickL
         disposables.dispose()
     }
 
-    override fun onMapReady( map: GoogleMap )
+    override fun onMapReady(map: GoogleMap)
     {
         googleMap = map
         googleMap.apply {
-            moveCamera( CameraUpdateFactory.newLatLng( LatLng(36.09, -94.1785) ) )
+            moveCamera(CameraUpdateFactory.newLatLng(LatLng(36.09, -94.1785)))
             moveCamera(CameraUpdateFactory.zoomTo(12.0f))
             setMinZoomPreference(10f)
             setOnMarkerClickListener(this@LiveMapFragment)
@@ -133,84 +134,30 @@ class LiveMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickL
     }
 
     @MainThread
-    private fun updateRoutes( routes: List<Route> )
+    private fun updateRoutes(route: Route)
     {
-        for (route in routes)
+        if (route.coordinates.size > 1)
         {
-            if (route.coordinates.size > 1)
-            {
-                val polylineOptions = PolylineOptions().color( route.color )
-                val polyline = googleMap.addPolyline(polylineOptions)
-                polyline.points = route.coordinates
-            }
-            if (!routeIds.contains(route.id))
-            {
-                routeIds.add( route.id )
-            }
+            val polylineOptions = PolylineOptions().color(route.color)
+            val polyline = googleMap.addPolyline(polylineOptions)
+            polyline.points = route.coordinates
         }
     }
 
     @MainThread
-    private fun updateBusses( busses: List<Bus> )
+    private fun updateBusses(bus: Bus)
     {
-        markers.clearMarkers()
-        for( bus in busses )
-        {
-            // This section is all about refreshing the markers on the google map
-            val markerOptions = MarkerOptions()
-                    .position(bus.coordinates)
-                    .flat(true)
-                    .alpha(0f)
-                    .title(bus.routeName)
-
-            val marker = googleMap.addMarker(markerOptions)
-            markers += marker
-
-            // This section is about refreshing the image
-            val key = getBusImageKey( bus.heading.toString(), bus.name )
-            val encodedImage = sharedPreferences?.getString(key, "") ?: ""
-
-            // If we already have the image, no need for a network request
-            if (encodedImage != "")
-            {
-                val bytes = Base64.decode(encodedImage, Base64.DEFAULT)
-                val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                val bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(bitmap)
-                marker.setIcon(bitmapDescriptor)
-                marker.alpha = 1f
-            }
-            // If we do NOT already have the image, fire off another network request to get it
-            else
-            {
-//                disposables += TransitStream.getBusImagesStream( bus.color!!, bus.heading.toString() )
-//                        .subscribe()
-//                            var color = ""
-//                            var heading = ""
-//                            val options = mapOf("color" to color, "heading" to heading)
-//                            Flowable.just(StartEvent())
-//                                    .flatMap {
-//                                        campusAPI.getBusImages(options)
-//                                                .map<NetworkState> { list -> NetworkState.Success.BusImages(list) }
-//                                                .onErrorReturn { t -> NetworkState.Failure(t) }
-//                                                .observeOn(AndroidSchedulers.mainThread())
-//                                                .startWith(NetworkState.InTransit())
-//                                    }
-//                                    .logNetworkState("loading bus images in loadBusses()")
-//                                    .ofType(NetworkState.Success.BusImages::class.java)
-//                                    .subscribe {
-//
-//                                    }
-            }
-        }
+        // if two markers have the same id but there has been an update, remove the old one and replace it with the new one
+        val markerOptions: MarkerOptions = MarkerOptions()
+                .title( bus.routeName )
+                .position( bus.coordinates )
+                .icon( bus.icon )
+                .flat(true)
+                .alpha(0f)
+        markers += googleMap.addMarker( markerOptions ).apply { alpha = 1f }
     }
 
-    private fun getBusImageKey( heading: String, name: String ): String
-    {
-        val x: Double = heading.toDouble()
-        return name + Integer.toString(( x.toInt() + 29 ) / 30 * 30)
-    }
-
-    override fun onMarkerClick( marker: Marker ): Boolean = false
+    override fun onMarkerClick(marker: Marker): Boolean = false
 
     interface OnFragmentInteractionListener
     {

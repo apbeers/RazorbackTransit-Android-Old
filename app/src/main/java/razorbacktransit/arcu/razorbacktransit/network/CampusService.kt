@@ -1,9 +1,9 @@
 package razorbacktransit.arcu.razorbacktransit.network
 
 import io.reactivex.Flowable
+import io.reactivex.Single
 import okhttp3.ResponseBody
 import razorbacktransit.arcu.razorbacktransit.model.bus.Bus
-import razorbacktransit.arcu.razorbacktransit.model.busimage.BusImage
 import razorbacktransit.arcu.razorbacktransit.model.route.Route
 import razorbacktransit.arcu.razorbacktransit.model.stopimage.StopImage
 import retrofit2.http.GET
@@ -18,10 +18,10 @@ interface CampusService
     fun getRoutes(): Flowable<List<Route>>
 
     @GET("buses")
-    fun getAllBuses(): Flowable<List<Bus>>
+    fun getBuses(@Query("routeIds") ids: String ): Flowable<List<Bus>>
 
     @GET("busimages")
-    fun getBusImages(@QueryMap colorAndHeading: Map<String, String>): Flowable<List<BusImage>>
+    fun getBusImages(@QueryMap colorAndHeading: Map<String, String>): Flowable<ResponseBody>
 
     @GET("stops")
     fun getStops(@Query("routeIds") routeId: String): Flowable<ResponseBody>
