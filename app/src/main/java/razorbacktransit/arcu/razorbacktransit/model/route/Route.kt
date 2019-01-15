@@ -1,6 +1,5 @@
 package razorbacktransit.arcu.razorbacktransit.model.route
 
-import android.graphics.Color
 import com.google.android.gms.maps.model.LatLng
 
 data class Route(val id: String,
