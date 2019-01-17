@@ -2,6 +2,7 @@ package razorbacktransit.arcu.razorbacktransit.model.bus
 
 import com.google.android.gms.maps.model.LatLng
 import com.squareup.moshi.Json
+import kotlin.math.roundToInt
 
 data class BusJson(@Json(name = "id") val id: String,
                    @Json(name = "fleet") val fleet: String,
@@ -31,7 +32,7 @@ data class BusJson(@Json(name = "id") val id: String,
             gpsId = gpsId,
             coordinates = LatLng(latitude, longitude),
             speed = speed,
-            heading = heading,
+            heading = heading.roundToInt(),
             power = power,
             date = date,
             color = color,

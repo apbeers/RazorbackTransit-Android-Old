@@ -39,6 +39,7 @@ fun ArrayList<Marker>.clearMarkers()
 fun Flowable<List<Route>>.buildBusIdsString(): Flowable<String>
 {
     return this.map { it.map { route -> route.id } }
+            .filter{ it.isNotEmpty() }
             .map { ids: List<String> ->
                 var idString = ""
                 for (id in ids)
@@ -51,9 +52,7 @@ fun Flowable<List<Route>>.buildBusIdsString(): Flowable<String>
 
 fun Flowable<List<Route>>.buildStopIdsString(): Flowable<String>
 {
-    return this.map {
-        it.map { route -> route.id }
-    }
+    return this.map { it.map { route -> route.id } }
             .filter{ it.isNotEmpty() }
             .map { ids: List<String> ->
                 var idString = ""

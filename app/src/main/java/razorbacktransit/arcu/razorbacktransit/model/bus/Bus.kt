@@ -1,10 +1,6 @@
 package razorbacktransit.arcu.razorbacktransit.model.bus
 
-import android.graphics.Bitmap
-import com.bumptech.glide.request.target.SimpleTarget
-import com.bumptech.glide.request.transition.Transition
 import com.google.android.gms.maps.model.BitmapDescriptor
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 
 data class Bus(val id: String,
@@ -15,7 +11,7 @@ data class Bus(val id: String,
                val gpsId: String,
                val coordinates: LatLng,
                val speed: Float,
-               val heading: Float,
+               val heading: Int,
                val power: Boolean,
                val date: String,
                val color: String?,

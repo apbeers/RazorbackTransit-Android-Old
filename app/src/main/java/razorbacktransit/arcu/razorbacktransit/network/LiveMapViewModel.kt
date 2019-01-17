@@ -1,21 +1,12 @@
 package razorbacktransit.arcu.razorbacktransit.network
 
 import android.app.Application
-import android.graphics.drawable.Drawable
 import android.util.Log
-import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.AndroidViewModel
 import com.bumptech.glide.Glide
-import com.bumptech.glide.GlideBuilder
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.RequestOptions
-import com.bumptech.glide.request.target.Target
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.MarkerOptions
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import com.squareup.picasso.Picasso
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -33,6 +24,7 @@ import razorbacktransit.arcu.razorbacktransit.utils.toBitMapDescriptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
+import java.util.concurrent.TimeUnit
 
 class LiveMapViewModel(application: Application): AndroidViewModel(application)
 {
@@ -50,6 +42,9 @@ class LiveMapViewModel(application: Application): AndroidViewModel(application)
             .addConverterFactory(MoshiConverterFactory.create(moshiAdapter).asLenient())
             .build()
             .create(CampusService::class.java)
+    private val updateBusesNotification = Flowable.interval(5, TimeUnit.SECONDS, Schedulers.io()).share()
+
+    var enabledList = arrayListOf<String>("221", "223","303", "227")
 
     val routes: Flowable<List<Route>> = Flowable.just(StartEvent())
             .flatMap {
@@ -62,52 +57,79 @@ class LiveMapViewModel(application: Application): AndroidViewModel(application)
             }
             .observeOn(Schedulers.computation())
             .ofType(NetworkState.Success.Routes::class.java)
-            .map { it.busRoutes.filter { bus -> bus.inService } }
+            .flatMap {
+                Flowable.fromIterable(it.busRoutes)
+                        .filter { route: Route->
+                            Log.d("DEBUGGINGFILTER", "Id: ${route.id}")
+                            if(route.inService && enabledList.contains(route.id))
+                            {
+                                Log.d("DEBUGGINGFILTER", "${route.name} permitted!")
+                            }
+                            route.inService  && enabledList.contains(route.id)
+                        }
+                        .toList()
+                        .toFlowable()
+            }
             .share()
 
-    fun getBusses(): Flowable<List<Bus>>
+    fun getBusses(): Flowable<List<MarkerOptions>>
     {
         val widthPixels = applicationContext.resources.displayMetrics.widthPixels
-        return routes.observeOn( Schedulers.computation() )
-                .doOnNext { Log.d("NETWORKDEBUGGING", "ATTEMPTING TO BUILD ID'S") }
-                .buildBusIdsString()
-                .doOnNext{ Log.d("NETWORKDEBUGGING", it) }
-                .observeOn( Schedulers.io() )
-                // Load the busses
-                .flatMap<NetworkState> { ids: String ->
-                    campusAPI.getBuses(ids)
-                            .map<NetworkState> { busses: List<Bus> -> NetworkState.Success.Busses(busses) }
-                            .onErrorReturn { t -> NetworkState.Failure(t) }
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .startWith(NetworkState.InTransit())
-                }
-                .logNetworkState("getBusses(): Loading from /stops")
-                .observeOn( Schedulers.computation() )
-                .ofType(NetworkState.Success.Busses::class.java)
-                .map { it.busses }
-                .observeOn( Schedulers.io() )
-                // Load the images into the busses
-                .flatMap { busses: List<Bus> ->
-                    Flowable.fromIterable( busses )
-                            .map {
-                                it.apply {
-                                    Log.d("NETWORKDEBUGGING", "${it.name}, Color: ${it.color}")
-                                    val busImageWidth = (widthPixels * 0.05833333333).toInt()
-                                    val busImageHeight = (widthPixels.toDouble() * 0.05833333333 * 1.6153846154).toInt()
-                                    Log.d("NETWORKDEBUGGING", getBusImageUrl( color!!, heading.toString() ))
-                                    this.icon = Glide.with(applicationContext).load(getBusImageUrl(color, heading.toString())).submit().get().toBitMapDescriptor(busImageWidth, busImageHeight)
-                                }
+        return updateBusesNotification
+                .flatMap {
+                    routes.observeOn( Schedulers.computation() )
+                            .doOnNext { Log.d("NETWORKDEBUGGING", "ATTEMPTING TO BUILD ID'S") }
+                            .buildBusIdsString()
+                            .doOnNext{ Log.d("NETWORKDEBUGGING", it) }
+                            .observeOn( Schedulers.io() )
+                            // Load the busses
+                            .flatMap<NetworkState> { ids: String ->
+                                campusAPI.getBuses(ids)
+                                        .map<NetworkState> { busses: List<Bus> -> NetworkState.Success.Busses(busses) }
+                                        .onErrorReturn { t -> NetworkState.Failure(t) }
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .startWith(NetworkState.InTransit())
                             }
-                            .toList()
-                            .toFlowable()
-                            .map <NetworkState> { NetworkState.Success.Busses( it ) }
-                            .onErrorReturn { NetworkState.Failure(it) }
-                            .startWith( NetworkState.InTransit() )
+                            .logNetworkState("getBusses(): Loading from /stops")
+                            .observeOn( Schedulers.computation() )
+                            .ofType(NetworkState.Success.Busses::class.java)
+                            .map { it.busses }
+                            .observeOn( Schedulers.io() )
+                            // Load the images into the busses
+                            .flatMap { busses: List<Bus> ->
+                                Flowable.fromIterable( busses )
+                                        .map {
+                                            it.apply {
+                                                Log.d("NETWORKDEBUGGING", "${it.name}, Color: ${it.color}")
+                                                val busImageWidth = (widthPixels * 0.05833333333).toInt()
+                                                val busImageHeight = (widthPixels.toDouble() * 0.05833333333 * 1.6153846154).toInt()
+                                                Log.d("NETWORKDEBUGGING", getBusImageUrl( color!!, heading.toString() ))
+                                                this.icon = Glide.with(applicationContext).load(getBusImageUrl(color, heading.toString())).submit().get().toBitMapDescriptor(busImageWidth, busImageHeight)
+                                            }
+                                        }
+                                        .toList()
+                                        .toFlowable()
+                                        .map <NetworkState> { NetworkState.Success.Busses( it ) }
+                                        .onErrorReturn { NetworkState.Failure(it) }
+                                        .startWith( NetworkState.InTransit() )
+                            }
+                            .logNetworkState("getStops(): Loading from /stopimages")
+                            .observeOn(Schedulers.computation())
+                            .ofType( NetworkState.Success.Busses::class.java )
+                            .map { it.busses }
+                            .flatMapIterable { it }
+                            .map {
+                                MarkerOptions()
+                                        .title( it.routeName )
+                                        .position( it.coordinates )
+                                        .icon( it.icon )
+                                        .flat(true)
+                                        .alpha(0f)
+                            }
+                            .toList().toFlowable()
                 }
-                .logNetworkState("getStops(): Loading from /stopimages")
-                .ofType( NetworkState.Success.Busses::class.java )
-                .map { it.busses }
                 .share()
+
     }
 
     fun getStops(): Flowable<List<Stop>>

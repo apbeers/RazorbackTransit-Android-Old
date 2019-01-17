@@ -18,16 +18,13 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
-import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
-import io.reactivex.schedulers.Schedulers
 import razorbacktransit.arcu.razorbacktransit.model.route.Route
 import razorbacktransit.arcu.razorbacktransit.model.stop.Stop
 import razorbacktransit.arcu.razorbacktransit.network.LiveMapViewModel
 import razorbacktransit.arcu.razorbacktransit.utils.clearMarkers
-import java.util.concurrent.TimeUnit
 
 
 class LiveMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener
@@ -40,10 +37,7 @@ class LiveMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickL
 
     private val disposables = CompositeDisposable()
 
-    private val updateBusesNotification = Flowable.interval(5, TimeUnit.SECONDS, Schedulers.io()).startWith(0).share()
     private lateinit var viewModel: LiveMapViewModel
-    private val filterList = arrayListOf<Route>()
-
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -76,20 +70,8 @@ class LiveMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickL
                 .observeOn( AndroidSchedulers.mainThread() )
                 .subscribe( this::updateStops )
 
-        disposables += updateBusesNotification
-                .flatMap {
-                    viewModel.getBusses()
-                            .observeOn(Schedulers.computation())
-                            .flatMapIterable { it }
-                            .map { MarkerOptions()
-                                    .title( it.routeName )
-                                    .position( it.coordinates )
-                                    .icon( it.icon )
-                                    .flat(true)
-                                    .alpha(0f) }
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .toList().toFlowable()
-                }
+        disposables += viewModel.getBusses()
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe( this::updateBusses )
 
         if (googleMap != null)
