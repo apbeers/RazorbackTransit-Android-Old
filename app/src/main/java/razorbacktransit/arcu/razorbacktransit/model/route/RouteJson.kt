@@ -1,11 +1,10 @@
 package razorbacktransit.arcu.razorbacktransit.model.route
 
 import android.graphics.Color
-import androidx.core.graphics.toColor
 import com.google.android.gms.maps.model.LatLng
 import com.squareup.moshi.Json
 
-data class RouteJson(@field:Json(name = "id") val id: String,
+data class RouteJson(@field:Json(name = "id") val id: Int,
                  @field:Json(name = "name") val name: String,
                  @field:Json(name = "description") val description: String,
                  @field:Json(name = "color") val color: String,
@@ -23,7 +22,7 @@ data class RouteJson(@field:Json(name = "id") val id: String,
         val coords = parseCoordinates( this.shape )
         return Route(
                 id = id,
-                name = name.substring(0, 2),
+                name = name,
                 description = description,
                 color = Color.parseColor( color ),
                 coordinates = coords,

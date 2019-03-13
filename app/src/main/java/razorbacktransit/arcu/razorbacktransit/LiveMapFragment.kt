@@ -19,15 +19,15 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.disposables.Disposable
+import razorbacktransit.arcu.razorbacktransit.model.bus.Bus
 import razorbacktransit.arcu.razorbacktransit.model.route.Route
-import razorbacktransit.arcu.razorbacktransit.model.stop.Stop
 import razorbacktransit.arcu.razorbacktransit.network.LiveMapViewModel
+import razorbacktransit.arcu.razorbacktransit.network.SubmitUiModel
 import razorbacktransit.arcu.razorbacktransit.utils.clearMarkers
 
 
-class LiveMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener
+class LiveMapFragment: Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener
 {
     private var mListener: OnFragmentInteractionListener? = null
     private var googleMap: GoogleMap? = null
@@ -35,8 +35,7 @@ class LiveMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickL
     private var busMarkers = arrayListOf<Marker>()
     private val stopMarkers = arrayListOf<Marker>()
 
-    private val disposables = CompositeDisposable()
-
+    private lateinit var disposable: Disposable
     private lateinit var viewModel: LiveMapViewModel
 
     override fun onCreate(savedInstanceState: Bundle?)
@@ -58,21 +57,17 @@ class LiveMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickL
     override fun onResume()
     {
         super.onResume()
-        Log.d("DEBUGGING", "onResume()")
 
-        disposables += viewModel.routes
-                .flatMapIterable { it }
-                .observeOn( AndroidSchedulers.mainThread() )
-                .subscribe( this::updateRoutes )
-
-        disposables += viewModel.getStops()
-                .flatMapIterable { it }
-                .observeOn( AndroidSchedulers.mainThread() )
-                .subscribe( this::updateStops )
-
-        disposables += viewModel.getBusses()
+        disposable = viewModel.observeAll
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe( this::updateBusses )
+                .subscribe {
+                    when(it)
+                    {
+                        is SubmitUiModel.SubmitRoute -> updateRoutes(it.route)
+                        is SubmitUiModel.SubmitBuses -> updateBusses(it.bus)
+                        is SubmitUiModel.SubmitStop -> updateStops(it.stop.icon!!)
+                    }
+                }
 
         if (googleMap != null)
         {
@@ -98,7 +93,7 @@ class LiveMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickL
     {
         super.onDetach()
         mListener = null
-        disposables.clear()
+        disposable.dispose()
     }
 
     override fun onMapReady(map: GoogleMap)
@@ -115,40 +110,38 @@ class LiveMapFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickL
     }
 
     @MainThread
-    private fun updateRoutes(route: Route)
+    private fun updateRoutes(routes: List<Route>)
     {
-        if (route.coordinates.size > 1)
+        Log.d("DEBUGGING", "updateRoutes()")
+        for (route in routes)
         {
-            val polylineOptions = PolylineOptions().color(route.color)
-            val polyline = googleMap!!.addPolyline(polylineOptions)
-            polyline.points = route.coordinates
+            if (route.coordinates.size > 1)
+            {
+                val polylineOptions = PolylineOptions().color(route.color)
+                val polyline = googleMap!!.addPolyline(polylineOptions)
+                polyline.points = route.coordinates
+            }
         }
     }
 
     @MainThread
-    private fun updateBusses(markers: List<MarkerOptions>)
+    private fun updateBusses(buses: List<Bus>)
     {
-        val newMarkers = ArrayList<Marker>()
-        for(marker in markers)
+        Log.d("DEBUGGING", "updateBusses()")
+        val markers = ArrayList<Marker>()
+        for(bus in buses)
         {
-            newMarkers += googleMap!!.addMarker(marker).apply { alpha = 1f }
+            markers += googleMap!!.addMarker(bus.icon).apply { alpha = 1f }
         }
         busMarkers.clearMarkers()
-        busMarkers = newMarkers
+        busMarkers = markers
     }
 
     @MainThread
-    private fun updateStops(stop: Stop)
+    private fun updateStops(stop: MarkerOptions)
     {
-        val markerOptions: MarkerOptions = MarkerOptions()
-                .snippet( stop.name )
-                .title( stop.nextArrival )
-                .position( stop.coordinates )
-                .icon( stop.icon )
-                .flat(true)
-                .alpha(0f)
-
-        stopMarkers += googleMap!!.addMarker( markerOptions ).apply { alpha = 1f }
+        Log.d("DEBUGGING", "updateStops()")
+        stopMarkers += googleMap!!.addMarker( stop ).apply { alpha = 1f }
     }
 
     override fun onMarkerClick(marker: Marker): Boolean = false

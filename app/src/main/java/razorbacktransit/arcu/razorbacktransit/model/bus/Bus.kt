@@ -2,6 +2,7 @@ package razorbacktransit.arcu.razorbacktransit.model.bus
 
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 
 data class Bus(val id: String,
                val fleet: String,
@@ -21,5 +22,6 @@ data class Bus(val id: String,
                val nextStop: String?,
                val nextArrival: String?)
 {
-    @Transient var icon: BitmapDescriptor? = null
+    @Transient var icon: MarkerOptions? = null
+    @Transient var ids: String? = null
 }

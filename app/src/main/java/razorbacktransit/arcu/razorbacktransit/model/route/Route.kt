@@ -2,7 +2,7 @@ package razorbacktransit.arcu.razorbacktransit.model.route
 
 import com.google.android.gms.maps.model.LatLng
 
-data class Route(val id: String,
+data class Route(val id: Int,
                  val name: String,
                  val description: String,
                  val color: Int,

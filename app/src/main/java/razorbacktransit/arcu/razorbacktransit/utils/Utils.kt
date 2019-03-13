@@ -36,34 +36,6 @@ fun ArrayList<Marker>.clearMarkers()
     this.clear()
 }
 
-fun Flowable<List<Route>>.buildBusIdsString(): Flowable<String>
-{
-    return this.map { it.map { route -> route.id } }
-            .filter{ it.isNotEmpty() }
-            .map { ids: List<String> ->
-                var idString = ""
-                for (id in ids)
-                {
-                    idString += "$id-"
-                }
-                return@map idString.substring(0, idString.lastIndex - 1)
-            }
-}
-
-fun Flowable<List<Route>>.buildStopIdsString(): Flowable<String>
-{
-    return this.map { it.map { route -> route.id } }
-            .filter{ it.isNotEmpty() }
-            .map { ids: List<String> ->
-                var idString = ""
-                for (id in ids)
-                {
-                    idString += "$id-"
-                }
-                return@map idString.substring(0, idString.lastIndex - 1)
-            }
-}
-
 fun Drawable.toBitMapDescriptor(width: Int, height: Int): BitmapDescriptor
 {
     return BitmapDescriptorFactory.fromBitmap(this.toBitmap(width, height))

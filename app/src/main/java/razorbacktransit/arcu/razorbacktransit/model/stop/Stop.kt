@@ -1,7 +1,7 @@
 package razorbacktransit.arcu.razorbacktransit.model.stop
 
-import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 
 class Stop(val id: String,
            val name: String,
@@ -11,6 +11,6 @@ class Stop(val id: String,
            val distance: String?,
            val nextArrival: String?)
 {
-    @Transient var icon: BitmapDescriptor? = null
+    @Transient var icon: MarkerOptions? = null
     @Transient var routeIds: String? = null
 }
