@@ -2,17 +2,20 @@ package razorbacktransit.arcu.razorbacktransit;
 
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.NavigationView;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import com.google.android.material.navigation.NavigationView;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -21,10 +24,12 @@ public class MainActivity extends AppCompatActivity
         SchedulesFragment.OnFragmentInteractionListener,
         RoutesFragment.OnFragmentInteractionListener,
         ViewScheduleFragment.OnFragmentInteractionListener,
-        ViewRouteFragment.OnFragmentInteractionListener {
+        ViewRouteFragment.OnFragmentInteractionListener
+{
 
-    int lastMenuItemId = 10;
-    private NavigationView navigationView;
+    @BindView(R.id.nav_view) NavigationView navigationView;
+    @BindView(R.id.toolbar) Toolbar toolbar;
+    @BindView(R.id.drawer_layout) DrawerLayout drawer;
     private LiveMapFragment liveMapFragment;
     private SchedulesFragment schedulesFragment;
     private RoutesFragment routesFragment;
@@ -33,6 +38,7 @@ public class MainActivity extends AppCompatActivity
     private ViewRouteFragment viewRouteFragment;
     private FirebaseAnalytics mFirebaseAnalytics;
     private final FragmentManager fragmentManager = getSupportFragmentManager();
+    int lastMenuItemId = 10;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,16 +47,14 @@ public class MainActivity extends AppCompatActivity
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
         setTheme(R.style.AppTheme_NoActionBar);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        ButterKnife.bind(this);
         setSupportActionBar(toolbar);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         liveMapFragment = new LiveMapFragment();
@@ -70,7 +74,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -88,7 +91,6 @@ public class MainActivity extends AppCompatActivity
             if (lastMenuItemId == navigationView.getMenu().getItem(1).getItemId() || lastMenuItemId == navigationView.getMenu().getItem(2).getItemId()) {
                 lastMenuItemId = id;
             } else {
-                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
                 drawer.closeDrawer(GravityCompat.START);
                 return true;
             }
@@ -213,7 +215,6 @@ public class MainActivity extends AppCompatActivity
             }
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -250,7 +251,7 @@ public class MainActivity extends AppCompatActivity
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         Bundle bundle = new Bundle();
         bundle.putString(FirebaseAnalytics.Param.ITEM_ID, title);
-        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "Route Viewed");
+        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "BusRoute Viewed");
         mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
 
         fragmentTransaction.add(R.id.container, viewRouteFragment).addToBackStack(viewRouteFragment.getClass().getSimpleName());

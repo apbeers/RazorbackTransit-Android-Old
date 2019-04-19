@@ -3,7 +3,7 @@ package razorbacktransit.arcu.razorbacktransit;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +11,9 @@ import android.view.ViewGroup;
 import com.github.barteksc.pdfviewer.PDFView;
 
 import java.io.InputStream;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 
 /**
@@ -27,7 +30,7 @@ public class ViewRouteFragment extends Fragment {
     private static final String ARG_PARAM1 = "filepath";
 
     private String mParam1;
-    private PDFView pdfView;
+    @BindView(R.id.pdfView) PDFView pdfView;
 
     private OnFragmentInteractionListener mListener;
 
@@ -56,7 +59,7 @@ public class ViewRouteFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_view_route, container, false);
-        pdfView = (PDFView)view.findViewById(R.id.pdfView);
+        ButterKnife.bind(this, view);
 
         InputStream inputStream = getResources().openRawResource(
                 getResources().getIdentifier(mParam1,
